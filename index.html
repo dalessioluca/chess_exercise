@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chess Visualization Trainer</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="app">
+
+  <!-- MENU SCREEN -->
+  <section id="screen-menu" class="screen">
+    <h1>Chess Visualization Trainer</h1>
+    <p class="subtitle">Train your board vision.</p>
+
+    <!-- Step 1: pick a game mode -->
+    <div class="mode-select" id="mode-select">
+      <button class="mode-card" data-mode="locate">
+        <span class="mode-title">Locate the Square</span>
+        <span class="mode-desc">You're given a square — click where it is on the board.</span>
+      </button>
+      <button class="mode-card" data-mode="piece">
+        <span class="mode-title">Name the Piece</span>
+        <span class="mode-desc">You're given a square — name the piece that starts there in the initial position.</span>
+      </button>
+      <button class="mode-card" data-mode="color">
+        <span class="mode-title">Name the Color</span>
+        <span class="mode-desc">You're given a square — click White or Black for its color.</span>
+      </button>
+      <button class="mode-card" data-mode="attacks">
+        <span class="mode-title">Does It Attack?</span>
+        <span class="mode-desc">You're given a Bishop, Knight, or Pawn on a square — type at least one square it attacks.</span>
+      </button>
+      <button class="mode-card" data-mode="move">
+        <span class="mode-title">Move the Piece</span>
+        <span class="mode-desc">You're given a Bishop or Knight, a start square, and an end square — type the list of squares it passes through to get there.</span>
+      </button>
+    </div>
+
+    <!-- Step 2: pick a difficulty -->
+    <div class="difficulty-select" id="difficulty-select" hidden>
+      <button class="back-link" id="btn-back-mode">&larr; Back</button>
+      <h2 class="section-heading" id="difficulty-heading">Choose difficulty</h2>
+
+      <div class="length-toggle" id="length-toggle">
+        <button class="length-btn active" data-length="30">30 Seconds</button>
+        <button class="length-btn" data-length="120">2 Minutes</button>
+        <button class="length-btn" data-length="endless">Endless</button>
+      </div>
+
+      <div class="pov-toggle" id="pov-toggle">
+        <button class="pov-btn active" data-pov="white">White POV</button>
+        <button class="pov-btn" data-pov="black">Black POV</button>
+      </div>
+
+      <div class="difficulty-grid">
+        <button class="difficulty-card" data-difficulty="easy">
+          <span class="difficulty-title">Beginner</span>
+          <span class="difficulty-desc">Squares colored, coordinates shown</span>
+        </button>
+        <button class="difficulty-card" data-difficulty="medium">
+          <span class="difficulty-title">Intermediate</span>
+          <span class="difficulty-desc">Squares colored, no coordinates</span>
+        </button>
+        <button class="difficulty-card" data-difficulty="advanced">
+          <span class="difficulty-title">Advanced</span>
+          <span class="difficulty-desc">Grid lines shown, no color</span>
+        </button>
+        <button class="difficulty-card" data-difficulty="hard">
+          <span class="difficulty-title">Expert</span>
+          <span class="difficulty-desc">Completely empty grid</span>
+        </button>
+        <button class="difficulty-card" data-difficulty="extreme" id="card-extreme" hidden>
+          <span class="difficulty-title">Master</span>
+          <span class="difficulty-desc">Blindfolded</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- GAME SCREEN -->
+  <section id="screen-game" class="screen" hidden>
+    <div class="game-header">
+      <div class="timer" id="timer">30</div>
+      <div class="target"><span id="target-label">Find:</span> <span id="target-square">a1</span></div>
+      <button id="btn-quit" class="btn-quit" title="Back to menu">&times;</button>
+    </div>
+
+    <div class="game-content" id="game-content">
+      <div class="board-stage" id="board-stage">
+        <div class="board-wrapper" id="board-wrapper"></div>
+        <div class="center-overlay" id="center-overlay" hidden></div>
+      </div>
+
+      <div class="answer-grid" id="answer-grid" hidden>
+        <button class="answer-btn" data-piece="king"><span class="piece-icon">&#9812;</span><span class="piece-label">King</span></button>
+        <button class="answer-btn" data-piece="queen"><span class="piece-icon">&#9813;</span><span class="piece-label">Queen</span></button>
+        <button class="answer-btn" data-piece="rook"><span class="piece-icon">&#9814;</span><span class="piece-label">Rook</span></button>
+        <button class="answer-btn" data-piece="bishop"><span class="piece-icon">&#9815;</span><span class="piece-label">Bishop</span></button>
+        <button class="answer-btn" data-piece="knight"><span class="piece-icon">&#9816;</span><span class="piece-label">Knight</span></button>
+      </div>
+
+      <div class="color-grid" id="color-grid" hidden>
+        <button class="color-btn" data-color="white">White</button>
+        <button class="color-btn" data-color="black">Black</button>
+      </div>
+
+      <div class="attack-panel" id="attack-panel" hidden>
+        <div class="attack-claim">
+          <div class="attack-piece" id="attack-piece">White Knight on F3</div>
+          <div class="attack-arrow">attacks which square?</div>
+        </div>
+        <div class="move-input-row">
+          <input type="text" id="attack-input" class="move-input" placeholder="e.g. d4" autocomplete="off" autocapitalize="off" spellcheck="false">
+          <button class="move-submit-btn" id="attack-submit">Submit</button>
+        </div>
+        <p class="move-feedback" id="attack-feedback"></p>
+      </div>
+
+      <div class="move-panel" id="move-panel" hidden>
+        <div class="move-claim">
+          <div class="move-piece" id="move-piece">White Knight</div>
+          <div class="move-squares" id="move-squares">B1 &rarr; F6</div>
+        </div>
+        <div class="move-input-row">
+          <input type="text" id="move-input" class="move-input" placeholder="e.g. d2, e4, f6" autocomplete="off" autocapitalize="off" spellcheck="false">
+          <button class="move-submit-btn" id="move-submit">Submit</button>
+        </div>
+        <p class="move-feedback" id="move-feedback"></p>
+      </div>
+    </div>
+
+    <p class="master-hint" id="master-hint" hidden>Blindfolded mode &mdash; listen, then tap your answer. Press Esc any time to quit.</p>
+  </section>
+
+  <!-- RESULTS SCREEN -->
+  <section id="screen-results" class="screen" hidden>
+    <h2 id="results-heading">Time's up!</h2>
+    <div class="results-grid">
+      <div class="result-box correct">
+        <span class="result-number" id="result-correct">0</span>
+        <span class="result-label">Correct</span>
+      </div>
+      <div class="result-box incorrect">
+        <span class="result-number" id="result-incorrect">0</span>
+        <span class="result-label">Incorrect</span>
+      </div>
+    </div>
+    <p class="accuracy" id="result-accuracy"></p>
+
+    <div class="results-actions">
+      <button id="btn-again" class="btn-primary">Play Again</button>
+      <button id="btn-menu" class="btn-secondary">Change Mode</button>
+    </div>
+  </section>
+
+</div>
+
+<script src="script.js" defer></script>
+</body>
+</html>
